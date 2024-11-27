@@ -1,49 +1,38 @@
 package com.example.users.services;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
-
-import com.example.users.models.Product;
-
 import java.util.List;
 import java.util.Optional;
+import com.example.users.models.Product;
+import com.example.users.repositories.ProductRepository;
 
 @Service
 public class ProductService {
-
     @Autowired
-    private MongoTemplate mongoTemplate;
+    private ProductRepository repository;
 
     public List<Product> getAllProducts() {
-        return mongoTemplate.findAll(Product.class);
+        return repository.findAll();
     }
 
     public Optional<Product> getProductById(String id) {
-        return Optional.ofNullable(mongoTemplate.findById(id, Product.class));
+        return repository.findById(id);
     }
 
     public Product createProduct(Product product) {
-        mongoTemplate.save(product);
-        return product;
+        return repository.save(product);
     }
 
     public Product updateProduct(String id, Product product) {
-        if (mongoTemplate.exists(Query.query(Criteria.where("id").is(id)), Product.class)) {
-            product.setId(id);
-            mongoTemplate.save(product);
-            return product;
-        }
-        return null;
+        return repository.findById(id).map(existing -> {
+            existing.setName(product.getName());
+            existing.setDescription(product.getDescription());
+            existing.setPrice(product.getPrice());
+            return repository.save(existing);
+        }).orElseThrow(() -> new RuntimeException("Product not found"));
     }
 
-    public boolean deleteProduct(String id) {
-        if (mongoTemplate.exists(Query.query(Criteria.where("id").is(id)), Product.class)) {
-            mongoTemplate.remove(Query.query(Criteria.where("id").is(id)), Product.class);
-            return true;
-        }
-        return false;
+    public void deleteProduct(String id) {
+        repository.deleteById(id);
     }
 }
