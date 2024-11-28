@@ -29,7 +29,7 @@ public class ProductService {
             existing.setDescription(product.getDescription());
             existing.setPrice(product.getPrice());
             return repository.save(existing);
-        }).orElseThrow(() -> new RuntimeException("Product not found"));
+        }).orElseThrow(() -> new RuntimeException("Produto não encontrado"));
     }
 
     public void deleteProduct(String id) {

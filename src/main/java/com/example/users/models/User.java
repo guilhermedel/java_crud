@@ -1,14 +1,15 @@
 package com.example.users.models;
 
-import lombok.AllArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
+@Document(collection = "users")
 public class User {
-    private Long id;
+    @Id
+    private String id;
     private String name;
     private String email;
 }

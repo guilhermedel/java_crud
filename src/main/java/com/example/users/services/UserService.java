@@ -1,42 +1,39 @@
 package com.example.users.services;
 
 import org.springframework.stereotype.Service;
-
-import com.example.users.models.User;
-
-import java.util.ArrayList;
+import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Optional;
+import com.example.users.models.User;
+import com.example.users.repositories.UserRepository;
 
 @Service
 public class UserService {
 
-    private final List<User> users = new ArrayList<>();
-    private Long nextId = 1L;
+    @Autowired
+    private UserRepository repository;
 
     public List<User> getAllUsers() {
-        return users;
+        return repository.findAll();
     }
 
-    public Optional<User> getUserById(Long id) {
-        return users.stream().filter(user -> user.getId().equals(id)).findFirst();
+    public Optional<User> getUserById(String id) {
+        return repository.findById(id);
     }
 
     public User createUser(User user) {
-        user.setId(nextId++);
-        users.add(user);
-        return user;
+        return repository.save(user);
     }
 
-    public User updateUser(Long id, User user) {
-        return getUserById(id).map(existingUser -> {
+    public User updateUser(String id, User user) {
+        return repository.findById(id).map(existingUser -> {
             existingUser.setName(user.getName());
             existingUser.setEmail(user.getEmail());
-            return existingUser;
-        }).orElse(null);
+            return repository.save(existingUser);
+        }).orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
     }
 
-    public boolean deleteUser(Long id) {
-        return users.removeIf(user -> user.getId().equals(id));
+    public void deleteUser(String id) {
+        repository.deleteById(id);
     }
 }
